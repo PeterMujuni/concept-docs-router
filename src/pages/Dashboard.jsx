@@ -1,21 +1,29 @@
 // rrd
-import { useLoaderData } from "react-router-dom";
+import { Link, useLoaderData } from "react-router-dom";
 
 // components
 import Intro from "../components/Intro/Intro";
 import AddBudgetForm from "../components/AddBudgetForm/AddBudgetForm";
 import AddExpenseForm from "../components/AddExpenseForm/AddExpenseForm";
 import BudgetItem from "../components/BudgetItem/BudgetItem";
+import Table from "../components/Table/Table";
 
 // helper
-import { createBudget, createExpense, fetchData, waait } from "../helpers";
+import {
+	createBudget,
+	createExpense,
+	deleteItem,
+	fetchData,
+	waait,
+} from "../helpers";
 import { toast } from "react-toastify";
 
 // loader
 export function dashboardLoader() {
 	const userName = fetchData("userName");
 	const budgets = fetchData("budgets");
-	return { userName, budgets };
+	const expenses = fetchData("expenses");
+	return { userName, budgets, expenses };
 }
 
 // action
@@ -64,10 +72,21 @@ export async function dashboardAction({ request }) {
 			throw new Error("There was a problem creating your expense");
 		}
 	}
+
+	// delete expense submission
+	if (_action === "deleteExpense") {
+		try {
+			// delete expense
+			deleteItem({ key: "expenses", id: values.expenseId });
+			return toast.success(`Expense deleted!`);
+		} catch (error) {
+			throw new Error("There was a problem deleting your expense");
+		}
+	}
 }
 
 const Dashboard = () => {
-	const { userName, budgets } = useLoaderData();
+	const { userName, budgets, expenses } = useLoaderData();
 
 	return (
 		<>
@@ -92,6 +111,28 @@ const Dashboard = () => {
 										/>
 									))}
 								</div>
+								{expenses && expenses.length > 0 && (
+									<div className='grid-md'>
+										<h2>Recent Expenses</h2>
+										<Table
+											expenses={expenses
+												.sort(
+													(a, b) =>
+														b.createdAt -
+														a.createdAt
+												)
+												.slice(0, 5)}
+										/>
+										{expenses.length > 5 && (
+											<Link
+												to={"expenses"}
+												className='btn btn--dark'
+											>
+												View all expenses
+											</Link>
+										)}
+									</div>
+								)}
 							</div>
 						) : (
 							<div className='grid-sm'>

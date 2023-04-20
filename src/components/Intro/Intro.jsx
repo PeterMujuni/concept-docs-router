@@ -1,11 +1,14 @@
 import React from "react";
-import { Form } from "react-router-dom";
+import { Form, useFetcher } from "react-router-dom";
 import { UserPlusIcon } from "@heroicons/react/24/solid";
 
 // assets
-import illustration from "../../assets/illustration.jpg"
+import illustration from "../../assets/illustration.jpg";
 
 const Intro = () => {
+	const fetcher = useFetcher();
+	const isSubmitting = fetcher.state === "submitting";
+
 	return (
 		<div className='intro'>
 			<div>
@@ -16,7 +19,7 @@ const Intro = () => {
 					Personal budgeting is the secret to financial freedom. Start
 					your journey today
 				</p>
-				<Form method='post'>
+				<fetcher.Form method='post'>
 					<input
 						type='text'
 						name='userName'
@@ -26,17 +29,32 @@ const Intro = () => {
 						aria-label='Your Name'
 						autoComplete='given-name'
 					/>
-					<input type="hidden" name="_action" value="newUser" />
+					<input
+						type='hidden'
+						name='_action'
+						value='newUser'
+					/>
 					<button
 						type='submit'
 						className='btn btn--dark'
+						disabled={isSubmitting}
 					>
-						<span>Create Account</span>
-						<UserPlusIcon width={20}/>
+						{isSubmitting ? (
+							"Creating account..."
+						) : (
+							<>
+								<span>Create Account</span>
+								<UserPlusIcon width={20} />
+							</>
+						)}
 					</button>
-				</Form>
+				</fetcher.Form>
 			</div>
-            <img src={illustration} alt="Person with money" width={600}/>
+			<img
+				src={illustration}
+				alt='Person with money'
+				width={600}
+			/>
 		</div>
 	);
 };
